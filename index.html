@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laddoo 🌸</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: linear-gradient(160deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%);
+  min-height: 100vh;
+  overflow: hidden;
+  font-family: 'Press Start 2P', monospace;
+  cursor: crosshair;
+}
+
+/* ── STARS ── */
+.stars { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+.star  { position: absolute; border-radius: 50%; background: white; animation: twinkle ease-in-out infinite; }
+@keyframes twinkle { 0%,100%{opacity:.2;transform:scale(1)} 50%{opacity:1;transform:scale(1.4)} }
+
+/* ── GROUND ── */
+.ground {
+  position: fixed; bottom: 0; left: 0; right: 0; height: 40px;
+  background: linear-gradient(180deg, #1e3a1e, #0d200d);
+  border-top: 3px solid #2d5a2d; z-index: 1;
+}
+
+/* ── SCENE ── */
+.scene {
+  position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%);
+  z-index: 100; display: flex; flex-direction: column; align-items: center;
+}
+
+/* ── SPEECH BUBBLE ── */
+.speech-bubble {
+  position: absolute; bottom: 220px; left: 50%;
+  transform: translateX(-50%);
+  background: #fffef5; border: 3px solid #333; border-radius: 12px;
+  padding: 10px 18px; font-size: 10px; color: #222;
+  white-space: nowrap; min-width: 120px; text-align: center;
+  box-shadow: 4px 4px 0 #33333366;
+  opacity: 0; transition: opacity 0.3s; z-index: 300;
+  max-width: 260px; white-space: normal; line-height: 1.8;
+}
+.speech-bubble.show { opacity: 1; }
+.speech-bubble::after  { content:''; position:absolute; bottom:-14px; left:50%; transform:translateX(-50%); border:7px solid transparent; border-top-color:#333; }
+.speech-bubble::before { content:''; position:absolute; bottom:-10px; left:50%; transform:translateX(-50%); border:5px solid transparent; border-top-color:#fffef5; z-index:1; }
+
+/* ─────────────────────────────────────────
+   LADDOO — original v1 pixel chibi style
+   ───────────────────────────────────────── */
+.pet-wrapper {
+  position: relative;
+  width: 80px; height: 200px;
+  cursor: pointer;
+}
+
+/* ── HEAD ── */
+.head {
+  position: absolute; bottom: 110px;
+  left: 50%; transform: translateX(-50%);
+  width: 72px; height: 68px;
+  background: #6b3f24;
+border: 2px solid #4a2a16;
+  border-radius: 40% 40% 36% 36%;
+  z-index: 10;
+}
+
+/* blush */
+.head::before {
+  content: '';
+  position: absolute; bottom: 14px; left: 5px;
+  width: 13px; height: 6px;
+  background: #ffaaaa; opacity: .5; border-radius: 50%;
+  box-shadow: 37px 0 0 #ffaaaa;
+}
+
+/* ── EARS ── */
+.ear { position: absolute; width: 12px; height: 16px; background: #6b3f24; border: 2px solid #4a2a16; border-radius: 50%; top: 18px; }
+.ear.l { left: -9px; } .ear.r { right: -9px; }
+.ear::after { content:''; position:absolute; inset:3px; background:#f5998a; opacity:.4; border-radius:50%; }
+
+/* ── CURLY HAIR ──
+   Original had a flat cap — we keep exact same structure but
+   replace the cap + straight divs with coily curls only.
+   Each curl = border-radius circle + dark inset shadow = coil look. */
+.hair-cap {
+  position: absolute;
+  top: -8px; left: 50%; transform: translateX(-50%);
+  width: 74px; height: 36px;
+  background: #1c0900;
+  border-radius: 50% 50% 0 0;
+  z-index: 12;
+}
+
+/* individual curl blobs on top of cap */
+.curls { position: absolute; top: -28px; left: 50%; transform: translateX(-50%); width: 88px; height: 38px; z-index: 13; }
+.curl {
+  position: absolute;
+  background: #1c0900;
+  border-radius: 50%;
+  /* inset shadow creates the "coil/ring" look – bright top-left, dark bottom-right */
+  box-shadow: inset 3px -4px 0 #090300, inset -2px 3px 0 #321400;
+}
+/* Row 1 – tall curls sticking UP above hairline */
+.curl.a1 { width:22px; height:22px; top:2px;  left:0px;  }
+.curl.a2 { width:26px; height:26px; top:-4px; left:17px; box-shadow: inset 4px -5px 0 #080200, inset -2px 3px 0 #2c1000; }
+.curl.a3 { width:24px; height:24px; top:-2px; left:40px; }
+.curl.a4 { width:22px; height:22px; top:0px;  left:63px; }
+/* Row 2 – mid filler */
+.curl.b1 { width:20px; height:20px; top:16px; left:4px;  box-shadow: inset 2px -3px 0 #090300, inset -1px 2px 0 #2a1000; }
+.curl.b2 { width:22px; height:22px; top:13px; left:22px; box-shadow: inset 3px -3px 0 #080200, inset -2px 2px 0 #281000; }
+.curl.b3 { width:22px; height:22px; top:13px; left:44px; box-shadow: inset 3px -3px 0 #080200; }
+.curl.b4 { width:18px; height:18px; top:16px; left:68px; box-shadow: inset 2px -3px 0 #090300; }
+/* Side curls — hang past the ears, same as original side hair */
+.curl-side-l  { position:absolute; top:-6px;  left:-14px; width:16px; height:22px; background:#1c0900; border-radius:50%; box-shadow:inset 2px -3px 0 #090300, inset -1px 2px 0 #2a1000; z-index:11; }
+.curl-side-l2 { position:absolute; top:14px;  left:-12px; width:14px; height:18px; background:#1c0900; border-radius:50%; box-shadow:inset 2px -2px 0 #090300; z-index:11; }
+.curl-side-r  { position:absolute; top:-6px;  right:-14px; width:16px; height:22px; background:#1c0900; border-radius:50%; box-shadow:inset -2px -3px 0 #090300, inset 1px 2px 0 #2a1000; z-index:11; }
+.curl-side-r2 { position:absolute; top:14px;  right:-12px; width:14px; height:18px; background:#1c0900; border-radius:50%; box-shadow:inset -2px -2px 0 #090300; z-index:11; }
+
+/* ── JASMINE FLOWER ──
+   5 teardrop/oval petals fanning from a gold centre, like real jasmine */
+.jasmine {
+  position: absolute;
+  top: -36px; right: -2px;
+  width: 26px; height: 26px;
+  z-index: 15;
+}
+/* green leaves behind petals */
+.j-leaf {
+  position: absolute;
+  width: 10px; height: 5px;
+  background: #4caf50;
+  border-radius: 50%;
+  top: 50%; z-index: 0;
+}
+.j-leaf.l { transform: translate(-10px, -1px) rotate(-40deg); }
+.j-leaf.r { transform: translate(14px,  -1px) rotate(40deg); }
+/* petals — tall ovals rotated around the centre point */
+.j-petal {
+  position: absolute;
+  width: 8px; height: 14px;
+  background: linear-gradient(180deg, #fffef8, #f0edcc);
+  border: 1px solid #dddaaa;
+  border-radius: 50% 50% 50% 50%;
+  top: 50%; left: 50%;
+  /* rotate around the bottom tip of each petal */
+  transform-origin: 50% 100%;
+  margin-top: -14px; margin-left: -4px;
+}
+.j-petal.p1 { transform: rotate(0deg); }
+.j-petal.p2 { transform: rotate(72deg); }
+.j-petal.p3 { transform: rotate(144deg); }
+.j-petal.p4 { transform: rotate(216deg); }
+.j-petal.p5 { transform: rotate(288deg); }
+/* golden centre with stamens */
+.j-center {
+  position: absolute;
+  width: 9px; height: 9px;
+  background: radial-gradient(circle, #ffe57a 40%, #ffa000 100%);
+  border-radius: 50%;
+  top: 50%; left: 50%; transform: translate(-50%, -50%);
+  z-index: 2;
+  box-shadow: 0 0 3px 1px rgba(255,200,0,.35);
+}
+/* tiny orange stamen dots */
+.j-center::before {
+  content: '';
+  position: absolute;
+  top: -4px; left: 50%; transform: translateX(-50%);
+  width: 3px; height: 3px; background: #e65100; border-radius: 50%;
+  box-shadow: 4px 2px 0 #e65100, -4px 2px 0 #e65100, 0 5px 0 #e65100;
+}
+
+/* ── GLASSES (unchanged from v1) ── */
+.glasses { position: absolute; top: 20px; left: 4px; width: 64px; height: 22px; z-index: 11; pointer-events: none; }
+.glasses svg { width: 100%; height: 100%; }
+
+/* ── EYES ── */
+.eyes { position: absolute; top: 26px; left: 50%; transform: translateX(-50%); width: 56px; display: flex; justify-content: space-between; }
+.eye  { width: 12px; height: 12px; background: white; border: 2px solid #333; border-radius: 50%; position: relative; overflow: visible; }
+.pupil { position: absolute; width: 5px; height: 5px; background: #111; border-radius: 50%; top: 2px; left: 2px; transition: transform .08s ease-out; }
+.pupil::after { content:''; position:absolute; width:2px; height:2px; background:white; border-radius:50%; top:0; right:0; }
+.eyebrow { position: absolute; top: -7px; left: -2px; width: 16px; height: 4px; background: #1c0900; border-radius: 3px; transform: rotate(-8deg); }
+.eye.right .eyebrow { transform: rotate(8deg); }
+
+/* ── NOSE ── */
+.nose { position: absolute; bottom: 22px; left: 50%; transform: translateX(-50%); width: 7px; height: 5px; border-left: 2px solid #4a2a16; border-right: 2px solid #4a2a16; border-bottom: 2px solid #4a2a16; border-radius: 0 0 5px 5px; }
+
+/* ── MOUTH ── */
+.mouth { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); width: 20px; height: 10px; border-bottom: 2.5px solid #c8704a; border-left: 2px solid #c8704a; border-right: 2px solid #c8704a; border-radius: 0 0 12px 12px; transition: all .3s; }
+.mouth.big     { width: 28px; height: 14px; }
+.mouth.neutral { width: 14px; height: 2px; border-bottom: 2px solid #c8704a; border-left: none; border-right: none; border-radius: 0; }
+
+/* ── BODY ── */
+.body-main {
+  position: absolute; bottom: 40px;
+  left: 50%; transform: translateX(-50%);
+  /* wider shoulders, slight taper = athletic V shape */
+  width: 66px; height: 62px;
+  background: #f4f4f4;
+  border: 2px solid #cfcfcf;
+  border-radius: 6px 6px 2px 2px;
+  /* subtle chest/pec shading */
+  box-shadow: inset -6px 0 0 rgba(0,0,0,.12), inset 6px 0 0 rgba(255,255,255,.05);
+}
+/* shirt centre seam */
+.body-main::after {
+  content:'';
+  position:absolute;
+  bottom:0;
+  left:50%;
+  transform:translateX(-50%);
+  width:8px;
+  height:32px;
+  background:#e8e8e8;          /* light seam */
+  border-left:1px solid #cfcfcf;
+  border-right:1px solid #cfcfcf;
+}
+/* chest muscle line — subtle horizontal shadow across upper chest */
+.body-main::before { content:''; position:absolute; top:14px; left:6px; right:6px; height:3px; background:rgba(0,0,0,.1); border-radius:2px; }
+/* pocket */
+.pocket { position:absolute; top:12px; left:8px; width:16px; height:13px; border:2px solid #cfcfcf; border-radius:2px; background:#ededed; }
+
+/* ── ARMS — thicker, slightly tapered (bigger at top = bicep) ── */
+.arm-wrap { position: absolute; bottom: 40px; }
+.arm-wrap.l { right: calc(50% + 30px); transform-origin: top right; }
+.arm-wrap.r { left: calc(50% + 30px); transform-origin: top left; }
+.arm {
+  width: 20px; height: 50px;
+  background: #f4f4f4; border: 2px solid #cfcfcf; border-radius: 6px;
+  position: relative;
+  /* bicep bulge: wider at top, shade on right side */
+  box-shadow: inset -3px 0 0 rgba(0,0,0,.15), inset 2px 0 0 rgba(255,255,255,.06);
+  clip-path: polygon(0 0, 100% 0, 88% 100%, 12% 100%); /* very slight taper */
+}
+.hand { position: absolute; bottom: -13px; left: 50%; transform: translateX(-50%); width: 20px; height: 17px; background: #6b3f24; border: 2px solid #4a2a16; border-radius: 50% 50% 40% 40%; }
+.hand::before { content:''; position:absolute; top:-5px; left:1px; width:5px; height:7px; background:#6b3f24; border:2px solid #4a2a16; border-radius:50% 50% 0 0; box-shadow:5px 0 0 #6b3f24, 5px -1px 0 1px #4a2a16, 10px 0 0 #6b3f24, 10px -1px 0 1px #4a2a16; }
+
+/* ── LEGS ── */
+.leg { position: absolute; bottom: 0; width: 18px; height: 42px; background: #1a2a3a; border: 2px solid #0f1d2a; }
+.leg.l { left: 13px; } .leg.r { right: 13px; }
+.foot { position: absolute; bottom: -7px; left: -3px; width: 24px; height: 9px; background: #111; border-radius: 2px 5px 4px 2px; border: 1px solid #000; }
+
+/* ── SHADOW ── */
+.shadow { position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%); width: 46px; height: 8px; background: rgba(0,0,0,.18); border-radius: 50%; }
+
+/* ─────────────────────────────────────────
+   PANDA (milo) — same as v1
+   ───────────────────────────────────────── */
+.panda-wrap {
+  position: absolute; bottom: 0; left: -100px;
+  opacity: 0; transform: scale(0) translateY(8px);
+  transition: opacity .5s cubic-bezier(.34,1.56,.64,1), transform .5s cubic-bezier(.34,1.56,.64,1);
+}
+.panda-wrap.show { opacity: 1; transform: scale(1) translateY(0); }
+
+.panda { position: relative; width: 68px; height: 78px; }
+.p-body { position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:48px; height:40px; background:#f5f5f5; border:2px solid #ddd; border-radius:40%; }
+.p-belly { position:absolute; bottom:5px; left:50%; transform:translateX(-50%); width:26px; height:20px; background:#e8e8e8; border-radius:50%; }
+.p-arm-l { position:absolute; bottom:14px; left:-4px; width:16px; height:10px; background:#222; border-radius:50%; transform:rotate(-20deg); }
+.p-arm-r { position:absolute; bottom:14px; right:-4px; width:16px; height:10px; background:#222; border-radius:50%; transform:rotate(20deg); }
+.p-leg-l { position:absolute; bottom:-7px; left:5px; width:16px; height:10px; background:#222; border-radius:0 0 6px 6px; }
+.p-leg-r { position:absolute; bottom:-7px; right:5px; width:16px; height:10px; background:#222; border-radius:0 0 6px 6px; }
+.p-head { position:absolute; top:0; left:50%; transform:translateX(-50%); width:46px; height:42px; background:#f5f5f5; border:2px solid #ddd; border-radius:50%; }
+.p-ear-l,.p-ear-r { position:absolute; width:14px; height:14px; background:#1e1e1e; border-radius:50%; top:-7px; }
+.p-ear-l { left:-1px; } .p-ear-r { right:-1px; }
+.p-ep-l,.p-ep-r { position:absolute; width:14px; height:13px; background:#1e1e1e; border-radius:50%; top:9px; }
+.p-ep-l { left:3px; } .p-ep-r { right:3px; }
+.p-eye-l,.p-eye-r { position:absolute; width:6px; height:6px; background:#fff; border-radius:50%; top:11px; }
+.p-eye-l { left:6px; } .p-eye-r { right:6px; }
+.p-eye-l::after,.p-eye-r::after { content:''; position:absolute; width:3.5px; height:3.5px; background:#111; border-radius:50%; top:1px; left:1px; }
+.p-shine { position:absolute; width:2px; height:2px; background:#fff; border-radius:50%; top:0; right:0; z-index:2; }
+.p-nose { position:absolute; bottom:13px; left:50%; transform:translateX(-50%); width:6px; height:4px; background:#555; border-radius:50%; }
+.p-mouth { position:absolute; bottom:7px; left:50%; transform:translateX(-50%); width:12px; height:5px; border-bottom:2px solid #888; border-left:2px solid #888; border-right:2px solid #888; border-radius:0 0 6px 6px; }
+.p-blush-l,.p-blush-r { position:absolute; width:7px; height:4px; background:#ffcccc; opacity:.5; border-radius:50%; bottom:11px; }
+.p-blush-l { left:2px; } .p-blush-r { right:2px; }
+.p-tag { position:absolute; bottom:-18px; left:50%; transform:translateX(-50%); background:#ffd54f; border:1.5px solid #f9a825; border-radius:3px; padding:1px 5px; font-size:7px; font-weight:900; color:#5d4037; white-space:nowrap; }
+
+/* ─────────────────────────────────────────
+   PHONE  — same frame, fixed girl inside
+   ───────────────────────────────────────── */
+.phone-wrap {
+  position: absolute; bottom: 60px; right: -30px;
+  opacity: 0; transform: translateY(18px) rotate(12deg);
+  transition: opacity .5s, transform .5s; z-index: 200;
+}
+.phone-wrap.show { opacity: 1; transform: translateY(0) rotate(10deg); }
+
+.phone-frame {
+  width: 64px; height: 110px;
+  background: #0d0d0d; border: 3px solid #2a2a2a; border-radius: 10px;
+  position: relative; overflow: hidden;
+  box-shadow: 0 0 18px rgba(100,180,255,.12);
+  animation: phoneGlow 2.5s ease-in-out infinite;
+}
+@keyframes phoneGlow { 0%,100%{box-shadow:0 0 18px rgba(100,180,255,.12)} 50%{box-shadow:0 0 28px rgba(120,200,255,.3)} }
+
+.phone-screen {
+  position: absolute; top: 9px; left: 3px; right: 3px; bottom: 7px;
+  background: #111; border-radius: 5px; overflow: hidden;
+}
+
+/* ---- GIRL inside phone ---- */
+.phone-girl {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center;
+  overflow: hidden;
+}
+
+/* warm bedroom bg */
+.pg-bg { position:absolute; inset:0; background:linear-gradient(170deg,#d4b898 0%,#c8a880 60%,#b89060 100%); }
+
+/* shoulders / top of body */
+.pg-shoulders {
+  position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 90px; height: 36px;
+  background: #5a3a2a;
+  border-radius: 50% 50% 0 0;
+}
+
+/* ── HAIR ──
+   Long straight dark hair, full volume, split in middle */
+.pg-hair-back {
+  position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+  width: 58px; height: 56px;
+  background: #120700; border-radius: 50% 50% 40% 40%; z-index: 1;
+}
+/* side curtains falling */
+.pg-hair-l {
+  position: absolute; bottom: 20px; left: 1px;
+  width: 16px; height: 56px;
+  background: #120700; border-radius: 30% 0 20% 50%; z-index: 1;
+}
+.pg-hair-r {
+  position: absolute; bottom: 20px; right: 1px;
+  width: 16px; height: 56px;
+  background: #120700; border-radius: 0 30% 50% 20%; z-index: 1;
+}
+/* centre part highlight */
+.pg-hair-back::after {
+  content: ''; position: absolute;
+  top: 6px; left: 50%; transform: translateX(-50%);
+  width: 2px; height: 20px; background: #2a1000; border-radius: 2px;
+}
+
+/* ── FACE ── */
+.pg-face {
+  position: absolute; top: 14px; left: 50%; transform: translateX(-50%);
+  width: 42px; height: 50px;
+  background: #f9d0a0; border-radius: 50% 50% 44% 44%; z-index: 2;
+}
+
+/* ── SHEET MASK ──  */
+.pg-mask {
+  position: absolute; inset: -1px -2px;
+  /* crisp white mask shape */
+  background: rgba(255,255,255,.93);
+  border-radius: 50% 50% 44% 44%; z-index: 3;
+  /* serum sheen on left side */
+  box-shadow: inset 3px 4px 8px rgba(255,255,255,.7), inset -2px -2px 6px rgba(210,210,190,.3);
+}
+/* drip lines down the mask */
+.pg-mask::before {
+  content: ''; position: absolute;
+  top: 10px; left: 5px;
+  width: 4px; height: 22px;
+  background: linear-gradient(180deg, rgba(255,255,255,.7), transparent);
+  border-radius: 2px;
+  box-shadow: 22px 4px 0 2px rgba(255,255,255,.5);
+}
+/* bottom drips hanging off chin */
+.pg-mask::after {
+  content: ''; position: absolute;
+  bottom: -6px; left: 8px;
+  width: 3px; height: 8px;
+  background: rgba(255,255,255,.7); border-radius: 0 0 3px 3px;
+  box-shadow: 14px 2px 0 2px rgba(255,255,255,.55), 24px 0 0 2px rgba(255,255,255,.4);
+}
+
+/* skin showing through eye & mouth holes */
+.pg-hole-l, .pg-hole-r {
+  position: absolute; z-index: 4;
+  width: 11px; height: 9px;
+  background: #f9d0a0; border-radius: 50%;
+  top: 14px;
+}
+.pg-hole-l { left: 5px; } .pg-hole-r { right: 5px; }
+
+.pg-mouth-hole {
+  position: absolute; bottom: 9px; left: 50%; transform: translateX(-50%);
+  width: 12px; height: 7px;
+  background: #f9d0a0; border-radius: 50%; z-index: 4;
+}
+
+/* ── EYES (visible through holes) ── */
+.pg-eye-l, .pg-eye-r {
+  position: absolute; top: 14px; z-index: 5;
+  width: 11px; height: 9px;
+}
+.pg-eye-l { left: 5px; } .pg-eye-r { right: 5px; }
+
+/* white sclera */
+.pg-eye-l::before, .pg-eye-r::before {
+  content: ''; position: absolute; inset: 0; background: #fff; border-radius: 50%;
+}
+/* iris + pupil */
+.pg-eye-l::after, .pg-eye-r::after {
+  content: ''; position: absolute;
+  width: 7px; height: 7px; top: 1px; left: 2px;
+  background: #1e0e00; border-radius: 50%;
+}
+
+/* shine dot */
+.pg-shine {
+  position: absolute; width: 2.5px; height: 2.5px;
+  background: white; border-radius: 50%; z-index: 6;
+  top: 15px;
+}
+.pg-shine.l { left: 12px; } .pg-shine.r { right: 12px; }
+
+/* ── LASHES ── */
+.pg-lash-l, .pg-lash-r {
+  position: absolute; top: 11px; z-index: 6;
+  width: 13px; height: 5px;
+  /* CSS lashes: repeating short lines */
+  background: repeating-linear-gradient(
+    90deg, #111 0, #111 1.5px, transparent 1.5px, transparent 3.5px
+  );
+  border-radius: 2px;
+}
+.pg-lash-l { left: 4px; transform: rotate(-5deg) skewX(-5deg); }
+.pg-lash-r { right: 4px; transform: rotate(5deg) skewX(5deg); }
+
+/* ── BROWS ── */
+.pg-brow-l, .pg-brow-r {
+  position: absolute; top: 8px; z-index: 6;
+  width: 12px; height: 3px; background: #1e0e00; border-radius: 3px;
+}
+.pg-brow-l { left: 5px; transform: rotate(-9deg); }
+.pg-brow-r { right: 5px; transform: rotate(9deg); }
+
+/* ── NOSE ── */
+.pg-nose {
+  position: absolute; top: 27px; left: 50%; transform: translateX(-50%);
+  z-index: 4;
+  width: 7px; height: 4px;
+  border-left: 1.5px solid rgba(180,120,80,.45);
+  border-right: 1.5px solid rgba(180,120,80,.45);
+  border-bottom: 1.5px solid rgba(180,120,80,.45);
+  border-radius: 0 0 4px 4px;
+}
+
+/* ── LIPS (visible through mouth hole) ── */
+.pg-lips {
+  position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
+  z-index: 5; width: 10px; height: 5px;
+  border-bottom: 2px solid #d06860;
+  border-left: 1.5px solid #d06860; border-right: 1.5px solid #d06860;
+  border-radius: 0 0 8px 8px;
+}
+/* upper lip line */
+.pg-lips::before {
+  content: ''; position: absolute;
+  top: -2px; left: 50%; transform: translateX(-50%);
+  width: 6px; height: 2px;
+  border-top: 1.5px solid #d06860; border-radius: 2px;
+}
+
+/* ── BLUSH ── */
+.pg-blush-l, .pg-blush-r {
+  position: absolute; bottom: 14px; z-index: 6;
+  width: 9px; height: 5px; background: #ffaaaa; opacity: .45; border-radius: 50%;
+}
+.pg-blush-l { left: 0; } .pg-blush-r { right: 0; }
+
+/* ── PHONE STATUS BAR ── */
+.ph-bar {
+  position: absolute; top: 0; left: 0; right: 0; height: 13px;
+  background: rgba(0,0,0,.55); z-index: 20;
+  display: flex; align-items: center; padding: 0 4px; gap: 3px;
+}
+.ph-dot { width: 5px; height: 5px; border-radius: 50%; }
+.ph-live { margin-left: auto; font-size: 5px; color: #ff4444; font-weight: 900; letter-spacing: .5px; }
+.ph-live::before { content: '● '; font-size: 4px; }
+
+/* notif badge */
+.notif-badge {
+  position: absolute; top: -7px; right: -7px;
+  width: 18px; height: 18px; background: #ff3b5c; border-radius: 50%;
+  border: 2px solid white; color: white; font-size: 8px; font-weight: 900;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity .3s; z-index: 201;
+  font-family: sans-serif;
+}
+
+/* ─────────────────────────────────────────
+   UI — progress dots & button
+   ───────────────────────────────────────── */
+.dots { position:fixed; top:18px; left:50%; transform:translateX(-50%); display:flex; gap:7px; z-index:400; }
+.dot  { width:8px; height:8px; background:rgba(255,255,255,.18); border-radius:50%; transition:background .3s, transform .3s; }
+.dot.on { background:#ff6b9d; transform:scale(1.3); }
+
+.yay-btn {
+  position: fixed; bottom: 16px; right: 22px;
+  background: linear-gradient(135deg, #ff6b9d, #ff9a3c);
+  border: none; border-radius: 50px; color: white;
+  font-family: 'Press Start 2P', monospace; font-size: 9px;
+  padding: 11px 20px; cursor: pointer; z-index: 500;
+  box-shadow: 0 4px 16px rgba(255,107,157,.45);
+  transition: transform .1s;
+}
+.yay-btn:hover { transform: scale(1.06); }
+.yay-btn:active { transform: scale(.96); }
+
+/* ─────────────────────────────────────────
+   ANIMATIONS — same as v1
+   ───────────────────────────────────────── */
+@keyframes idleFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+@keyframes jumpHappy {
+  0%  { transform:translateY(0) rotate(0); }
+  28% { transform:translateY(-52px) rotate(-5deg); }
+  48% { transform:translateY(-60px) rotate(5deg); }
+  68% { transform:translateY(-22px) rotate(-2deg); }
+  84% { transform:translateY(-7px); }
+  100%{ transform:translateY(0); }
+}
+@keyframes wave { 0%,100%{transform:rotate(0deg)} 30%{transform:rotate(-36deg)} 70%{transform:rotate(8deg)} }
+@keyframes pandaBob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} }
+@keyframes notifShake { 0%,100%{transform:translateY(0) rotate(10deg)} 25%{transform:translateY(-2px) rotate(7deg)} 75%{transform:translateY(0) rotate(13deg)} }
+@keyframes heartPop { 0%{opacity:1;transform:translateY(0) scale(1)} 100%{opacity:0;transform:translateY(-65px) scale(1.5)} }
+</style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+<div class="ground"></div>
+
+<!-- progress dots -->
+<div class="dots">
+  <div class="dot on" id="d0"></div><div class="dot" id="d1"></div>
+  <div class="dot" id="d2"></div><div class="dot" id="d3"></div>
+  <div class="dot" id="d4"></div><div class="dot" id="d5"></div>
+  <div class="dot" id="d6"></div>
+</div>
+
+<button class="yay-btn" onclick="doJump()">🌸 yay!</button>
+
+<div class="scene" id="scene">
+
+  <div class="speech-bubble" id="bubble">hi!</div>
+
+  <!-- PANDA -->
+  <div class="panda-wrap" id="pandaWrap">
+    <div class="panda">
+      <div class="p-head">
+        <div class="p-ear-l"></div><div class="p-ear-r"></div>
+        <div class="p-ep-l"><div class="p-eye-l"><div class="p-shine"></div></div></div>
+        <div class="p-ep-r"><div class="p-eye-r"><div class="p-shine"></div></div></div>
+        <div class="p-blush-l"></div><div class="p-blush-r"></div>
+        <div class="p-nose"></div><div class="p-mouth"></div>
+      </div>
+      <div class="p-body">
+        <div class="p-belly"></div>
+        <div class="p-arm-l"></div><div class="p-arm-r"></div>
+        <div class="p-leg-l"></div><div class="p-leg-r"></div>
+      </div>
+    </div>
+    <div class="p-tag">🐼 milo</div>
+  </div>
+
+  <!-- PHONE -->
+  <div class="phone-wrap" id="phoneWrap">
+    <div class="notif-badge" id="notifBadge">1</div>
+    <div class="phone-frame">
+      <div class="phone-screen">
+        <div class="phone-girl">
+          <div class="pg-bg"></div>
+          <div class="pg-shoulders"></div>
+          <div class="pg-hair-back"></div>
+          <div class="pg-hair-l"></div>
+          <div class="pg-hair-r"></div>
+          <div class="pg-face">
+            <!-- mask + holes -->
+            <div class="pg-mask"></div>
+            <div class="pg-hole-l"></div>
+            <div class="pg-hole-r"></div>
+            <div class="pg-mouth-hole"></div>
+            <!-- eyes -->
+            <div class="pg-eye-l"></div>
+            <div class="pg-eye-r"></div>
+            <div class="pg-shine l"></div>
+            <div class="pg-shine r"></div>
+            <!-- lashes & brows -->
+            <div class="pg-lash-l"></div>
+            <div class="pg-lash-r"></div>
+            <div class="pg-brow-l"></div>
+            <div class="pg-brow-r"></div>
+            <!-- nose -->
+            <div class="pg-nose"></div>
+            <!-- lips -->
+            <div class="pg-lips"></div>
+            <!-- blush -->
+            <div class="pg-blush-l"></div>
+            <div class="pg-blush-r"></div>
+          </div>
+        </div>
+        <div class="ph-bar">
+          <div class="ph-dot" style="background:#ff5f57"></div>
+          <div class="ph-dot" style="background:#febc2e"></div>
+          <div class="ph-dot" style="background:#28c840"></div>
+          <span class="ph-live">LIVE</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LADDOO -->
+  <div class="pet-wrapper" id="petWrapper" style="animation:idleFloat 2.8s ease-in-out infinite;">
+
+    <!-- arms behind body -->
+    <div class="arm-wrap l" id="armL">
+      <div class="arm"><div class="hand"></div></div>
+    </div>
+    <div class="arm-wrap r" id="armR">
+      <div class="arm"><div class="hand"></div></div>
+    </div>
+
+    <div class="body-main">
+      <div class="pocket"></div>
+    </div>
+
+    <div class="leg l"><div class="foot"></div></div>
+    <div class="leg r"><div class="foot"></div></div>
+
+    <div class="shadow"></div>
+
+    <!-- HEAD -->
+    <div class="head" id="headEl">
+      <div class="ear l"></div>
+      <div class="ear r"></div>
+
+      <!-- side curls (hang past ears) -->
+      <div class="curl-side-l"></div>
+      <div class="curl-side-l2"></div>
+      <div class="curl-side-r"></div>
+      <div class="curl-side-r2"></div>
+
+      <!-- hair cap base -->
+      <div class="hair-cap"></div>
+
+      <!-- curls on top -->
+      <div class="curls">
+        <div class="curl a1"></div>
+        <div class="curl a2"></div>
+        <div class="curl a3"></div>
+        <div class="curl a4"></div>
+        <div class="curl b1"></div>
+        <div class="curl b2"></div>
+        <div class="curl b3"></div>
+        <div class="curl b4"></div>
+      </div>
+
+      <!-- jasmine flower -->
+      <div class="jasmine">
+        <div class="j-leaf l"></div>
+        <div class="j-leaf r"></div>
+        <div class="j-petal p1"></div>
+        <div class="j-petal p2"></div>
+        <div class="j-petal p3"></div>
+        <div class="j-petal p4"></div>
+        <div class="j-petal p5"></div>
+        <div class="j-center"></div>
+      </div>
+
+      <!-- glasses -->
+      <div class="glasses">
+        <svg viewBox="0 0 64 22" fill="none">
+          <rect x="2"  y="4" width="24" height="16" rx="5" stroke="#1a1a1a" stroke-width="2" fill="rgba(160,210,255,.1)"/>
+          <rect x="38" y="4" width="24" height="16" rx="5" stroke="#1a1a1a" stroke-width="2" fill="rgba(160,210,255,.1)"/>
+          <path d="M26,12 Q32,10 38,12" stroke="#1a1a1a" stroke-width="2"/>
+          <line x1="0"  y1="11" x2="2"  y2="11" stroke="#1a1a1a" stroke-width="2" stroke-linecap="round"/>
+          <line x1="62" y1="11" x2="64" y2="11" stroke="#1a1a1a" stroke-width="2" stroke-linecap="round"/>
+          <path d="M5,7 Q9,5 13,7"  stroke="rgba(255,255,255,.45)" stroke-width="1.3" stroke-linecap="round"/>
+          <path d="M41,7 Q45,5 49,7" stroke="rgba(255,255,255,.45)" stroke-width="1.3" stroke-linecap="round"/>
+        </svg>
+      </div>
+
+      <!-- eyes -->
+      <div class="eyes">
+        <div class="eye" id="eyeL">
+          <div class="eyebrow"></div>
+          <div class="pupil" id="pupL"></div>
+        </div>
+        <div class="eye right" id="eyeR">
+          <div class="eyebrow"></div>
+          <div class="pupil" id="pupR"></div>
+        </div>
+      </div>
+
+      <div class="nose"></div>
+      <div class="mouth" id="mouth"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── STARS ──
+const starsEl = document.getElementById('stars');
+for (let i = 0; i < 88; i++) {
+  const s = document.createElement('div'); s.className = 'star';
+  const sz = Math.random() * 2.5 + .5;
+  s.style.cssText = `width:${sz}px;height:${sz}px;top:${Math.random()*88}%;left:${Math.random()*100}%;animation-duration:${2+Math.random()*4}s;animation-delay:${Math.random()*5}s;`;
+  starsEl.appendChild(s);
+}
+
+// ── EYE TRACKING ──
+let mx = innerWidth/2, my = innerHeight/2;
+document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+const headEl = document.getElementById('headEl');
+const pupL   = document.getElementById('pupL');
+const pupR   = document.getElementById('pupR');
+function trackEyes() {
+  const r   = headEl.getBoundingClientRect();
+  const cx  = r.left + r.width/2, cy = r.top + r.height/2;
+  const ang = Math.atan2(my-cy, mx-cx);
+  const d   = Math.min(2.5, Math.hypot(mx-cx, my-cy)/75);
+  const px  = Math.cos(ang)*d, py = Math.sin(ang)*d;
+  pupL.style.transform = `translate(${px}px,${py}px)`;
+  pupR.style.transform = `translate(${px}px,${py}px)`;
+  requestAnimationFrame(trackEyes);
+}
+trackEyes();
+
+// ── REFS ──
+const bubble     = document.getElementById('bubble');
+const petWrapper = document.getElementById('petWrapper');
+const armL       = document.getElementById('armL');
+const armR       = document.getElementById('armR');
+const pandaWrap  = document.getElementById('pandaWrap');
+const phoneWrap  = document.getElementById('phoneWrap');
+const notifBadge = document.getElementById('notifBadge');
+const mouth      = document.getElementById('mouth');
+
+// ── HELPERS ──
+function showBubble(txt, dur=2400) {
+  return new Promise(res => {
+    bubble.innerHTML = txt;
+    bubble.classList.add('show');
+    setTimeout(() => { bubble.classList.remove('show'); setTimeout(res, 350); }, dur);
+  });
+}
+function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+function setMouth(t) { mouth.className = 'mouth' + (t ? ' '+t : ''); }
+function setDot(n) { for (let i=0;i<7;i++) document.getElementById('d'+i).classList.toggle('on', i===n); }
+function animArm(el, anim) {
+  el.style.animation = anim ? `${anim} .45s ease-in-out 3` : 'none';
+}
+
+// ── STORY ──
+async function story() {
+  await wait(600);
+
+  // 0 — wave hello
+  setDot(0);
+  armL.style.animation = 'wave 1.3s ease-in-out 3';
+  await showBubble('hi hi!! 👋<br>i\'m Laddoo!', 2800);
+  armL.style.animation = 'none';
+
+  // 1 — friend tease
+  setDot(1); setMouth('neutral');
+  await showBubble('i have a friend too... 👀', 2200);
+
+  // 2 — "you xb"
+  setDot(2); setMouth('big');
+  await showBubble('you xb 😈', 1900);
+
+  // 3 — kiddin
+  setDot(3); setMouth('');
+  await showBubble('jus kiddin fren 😭', 2100);
+
+  // 4 — milo appears
+  setDot(4);
+  await showBubble('this is my fren...', 1500);
+  pandaWrap.classList.add('show');
+  await wait(650);
+
+  // reach down & lift
+  armL.style.transition = 'transform .7s ease-in-out';
+  armL.style.transformOrigin = 'top right';
+  armL.style.transform = 'rotate(42deg) translateY(16px)';
+  await wait(480);
+  pandaWrap.style.transition = 'all .6s cubic-bezier(.34,1.56,.64,1)';
+  pandaWrap.style.transform   = 'scale(.88) translateY(-28px)';
+  pandaWrap.style.left        = '-94px';
+
+  await showBubble('this is milo! 🐼✨', 2900);
+
+  // put milo down
+  pandaWrap.style.transform = 'scale(1) translateY(0)';
+  armL.style.transform = 'rotate(0deg) translateY(0)';
+  await wait(700);
+  pandaWrap.style.animation = 'pandaBob 2s ease-in-out infinite';
+
+  // 5 — notification
+  setDot(5); setMouth('neutral');
+  await showBubble('...', 1100);
+
+  // arm into pocket
+  armR.style.transition    = 'transform .6s ease-in-out';
+  armR.style.transformOrigin = 'top left';
+  armR.style.transform    = 'rotate(30deg) translateX(8px) translateY(12px)';
+  await wait(800);
+
+  // phone buzz
+  notifBadge.style.opacity = '1';
+  phoneWrap.classList.add('show');
+  phoneWrap.style.animation = 'notifShake .5s ease-in-out';
+  setTimeout(() => { phoneWrap.style.animation = ''; }, 600);
+
+  await showBubble('oh— 📳', 1200);
+
+  // pull phone up
+  armR.style.transform = 'rotate(-26deg) translateX(-5px) translateY(-8px)';
+  setMouth('big');
+  await showBubble('oh look at this 😊', 2300);
+
+  // 6 — show phone to screen
+  setDot(6);
+  phoneWrap.style.transition = 'all .7s ease';
+  phoneWrap.style.transform  = 'translateY(-14px) rotate(-5deg)';
+  phoneWrap.style.right      = '-16px';
+  phoneWrap.style.bottom     = '78px';
+
+  await showBubble('hehehe 🙈', 2200);
+  await showBubble('she\'s wearing a sheet mask 💆‍♀️', 2400);
+
+  // tilts phone back, smirks, says "dont"
+  setMouth('big');
+  phoneWrap.style.transform = 'translateY(-6px) rotate(8deg)';
+  await showBubble('dont. 😐', 2000);
+
+  // put phone away — slides back down and hides
+  setMouth('neutral');
+  phoneWrap.style.transition = 'all .6s ease';
+  phoneWrap.style.transform  = 'translateY(20px) rotate(12deg)';
+  phoneWrap.style.opacity    = '0';
+  await wait(500);
+  phoneWrap.classList.remove('show');
+  phoneWrap.style.opacity = '';
+
+  // arm goes back into pocket
+  armR.style.transition = 'transform .6s ease-in-out';
+  armR.style.transform  = 'rotate(30deg) translateX(8px) translateY(12px)';
+  await wait(700);
+
+  await showBubble('okay okay that\'s enough 😅', 2000);
+
+  // arm comes back to rest
+  armR.style.transform = 'rotate(0deg)';
+
+  setMouth('');
+  petWrapper.style.animation = 'idleFloat 2.8s ease-in-out infinite';
+  localStorage.setItem('laddooDone', '1');
+  setTimeout(idleLoop, 5200);
+}
+
+const idleLines = ['hey 👋','(◠‿◠)','hm...','hi fren!','...','🌸','milo is napping 🐼','wassup','✦','*bounces*'];
+function idleLoop() {
+  showBubble(idleLines[Math.floor(Math.random()*idleLines.length)], 1900);
+  setTimeout(idleLoop, 6500 + Math.random()*5000);
+}
+
+// ── JUMP ──
+let jumping = false;
+function doJump() {
+  if (jumping) return; jumping = true;
+  petWrapper.style.animation = 'none';
+  void petWrapper.offsetWidth;
+  petWrapper.style.animation = 'jumpHappy .88s ease-in-out forwards';
+  setMouth('big');
+  showBubble('YAYYY!! 🎉✨🌸', 1100);
+  armL.style.animation = 'wave .4s ease-in-out 4';
+  armR.style.animation = 'wave .4s ease-in-out 4';
+
+  for (let i=0; i<6; i++) {
+    const h = document.createElement('div');
+    h.style.cssText = `position:fixed;font-size:${16+Math.random()*12}px;pointer-events:none;z-index:999;animation:heartPop 1.1s ease-out forwards;animation-delay:${i*.1}s;left:${43+Math.random()*14}%;bottom:${200+Math.random()*70}px;`;
+    h.textContent = ['♥','❤','🌸','✨','♡','💕'][i];
+    document.body.appendChild(h);
+    setTimeout(() => h.remove(), 1500);
+  }
+
+  setTimeout(() => {
+    petWrapper.style.animation = 'idleFloat 2.8s ease-in-out infinite';
+    setMouth(''); armL.style.animation='none'; armR.style.animation='none';
+    jumping = false;
+  }, 920);
+}
+
+story();
+</script>
+
+<style>
+@keyframes heartPop { 0%{opacity:1;transform:translateY(0) scale(1)} 100%{opacity:0;transform:translateY(-65px) scale(1.5)} }
+</style>
+</body>
+</html>
